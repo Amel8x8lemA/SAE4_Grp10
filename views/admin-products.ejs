@@ -141,9 +141,9 @@
           >
             Supprimer
           </button>
-          <button
-            class="adminButton"
-            onclick="editProduct('<%= product.id %>'); event.stopPropagation()"
+          <button 
+          class="deleteButton" 
+          onclick="confirmDelete('<%= product.id %>'); event.stopPropagation()"
           >
             Modifier
           </button>
