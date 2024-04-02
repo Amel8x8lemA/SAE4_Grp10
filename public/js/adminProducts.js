@@ -30,9 +30,35 @@ function closePopup() {
   document.body.style.overflowY = 'scroll';
 }
 
-function deleteProduct(id) {
-  console.log(id);
+
+
+const deleteButtons = document.querySelectorAll('.deleteButton');
+
+
+deleteButtons.forEach(button => {
+  button.addEventListener('click', onDeleteButtonClick);
+});
+
+
+function onDeleteButtonClick(event) {
+  const productId = event.target.dataset.productId;
+
+  deleteProduct(productId);
 }
+
+function deleteProduct(id) {
+  const query = `DELETE FROM products WHERE id = ${connection.escape(id)}`;
+
+  connection.query(query, (error, results, fields) => {
+    if (error) {
+      console.error("Erreur lors de la suppression du produit:", error);
+    } else {
+      console.log("Le produit a été supprimé avec succès.");
+    }
+  });
+}
+
+
 
 function modifyProduct(e) {
   e.preventDefault();
