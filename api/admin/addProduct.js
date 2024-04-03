@@ -54,6 +54,15 @@ router.post('', upload.single('image'), async (req, res) => {
       return;
     }
 
+    // Check if the release date is before the expiration date
+    if (new Date(release_date) >= new Date(expire_date)) {
+      // Delete the uploaded file if there is one
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(403).json({ success: false, message: 'La date de sortie doit être antérieure à la date d\'expiration' });
+    }
+
     if (confirm_threashold === '' || confirm_threashold === '0') {
       confirm_threashold = null;
     }
