@@ -9,8 +9,8 @@ router.post('', async (req, res) => {
 
   if (
     !req.body.xpThreshold ||
-    isNaN(req.body.xpThreshold) ||
-    req.body.xpThreshold < 0
+    //isNaN(req.body.xpThreshold) ||
+    parseInt(req.body.xpThreshold) < 0
   ) {
     res.status(400).json({error: 'Veuillez entrer un nombre valide'});
     return;

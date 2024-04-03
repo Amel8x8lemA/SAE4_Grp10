@@ -96,7 +96,7 @@
             name="xpAmount"
             id="xpAmount"
             class="gradeprice xpamount"
-            value="<%- xpAmount %>"
+            value="<%- process.env.XP_AMOUNT %>"
           />
           <button type="submit">Valider</button>
         </span>
@@ -114,7 +114,7 @@
             name="xpThreshold"
             id="xpThreshold"
             class="gradeprice xpamount"
-            value="<%- xpThreshold %>"
+            value="<%- process.env.XP_THRESHOLD %>"
           />
           <button type="submit">Valider</button>
         </span>
@@ -617,7 +617,7 @@
       const data = {
         xpAmount,
       };
-      fetch('/admin/changeXp', {
+      fetch('/api/admin/changeXpAmount', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
