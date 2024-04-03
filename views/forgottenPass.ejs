@@ -129,6 +129,9 @@
                     console.error('Server error')
                     alert('Une erreur est survenue, veuillez réessayer plus tard')
 
+                }  else if(response.status === 408){
+                    console.error('User not found')
+                    userAlert('L\'adresse email entrée n\'est pas la même que celle du compte connecté')
                 } else if(response.status === 409){
                     console.error('User not found')
                     alert('Aucun compte n\'est associé à cette adresse mail')
