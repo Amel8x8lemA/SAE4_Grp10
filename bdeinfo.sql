@@ -3,6 +3,11 @@
 -- Host: localhost    Database: mydatabase
 -- ------------------------------------------------------
 -- Server version	10.5.23-MariaDB-0+deb11u1
+
+DROP DATABASE IF EXISTS bdeinfo;
+CREATE DATABASE bdeinfo;
+USE bdeinfo;
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */
 ;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */
@@ -500,3 +505,5 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */
 ;
 -- Dump completed on 2024-02-28  9:24:54
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON bdeinfo.* TO 'etu'@'%' IDENTIFIED BY 'amego777' WITH GRANT OPTION;
