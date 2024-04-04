@@ -448,11 +448,13 @@ gradeButtons.forEach((button) => {
   button.addEventListener('click', (e) => {
     e.preventDefault();
 
-    if (button.classList.contains('unsubButton')) {
+    const userGrade = document.querySelector('.userGrade').textContent;
+
+    if (button.classList.contains('unsubButton') && userGrade !== 'None') {
       fetch('/api/user/unsubscribe', {
         method: 'POST',
         headers: {
-          'Content-type': 'appication/json',
+          'Content-type': 'application/json',
         },
         body: JSON.stringify({id: ''}),
       }).then((res) => {

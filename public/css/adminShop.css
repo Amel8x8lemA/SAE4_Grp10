@@ -191,6 +191,10 @@ textarea {
     align-items: start;
 }
 
+::-webkit-calendar-picker-indicator {
+    filter: var(--date-picker);
+}
+
 @media only screen and (max-width: 775px) {
     .shopLibrary {
         margin: 0;

@@ -224,7 +224,7 @@ function checkout(listOfItems) {
       if (data.success) {
         userAlertGood('Inscription réussie');
         setTimeout(() => {
-          window.location.href = '/account';
+          window.location.href = '/';
         }, 1000);
       } else if (data.error) {
         userAlert(data.error);
