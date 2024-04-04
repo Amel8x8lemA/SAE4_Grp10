@@ -118,6 +118,7 @@
       </form>
 
       <% products.forEach((product) => { %>
+        <% if (product.id != 1) { %>
       <div
         class="product verticalflex"
         data-promoted="<%= product.is_promoted %>"
@@ -163,7 +164,7 @@
           </span>
         </div>
       </div>
-      <% }) %>
+      <% }}) %>
     </div>
   </body>
   <script src="/js/logic.js"></script>

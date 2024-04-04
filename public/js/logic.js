@@ -443,61 +443,6 @@ if (window.calData !== undefined) {
   renderEventsCalendar(filteredEvents);
 }
 
-/*
-const gradeButtons = document.querySelectorAll('.gradeBuyButton');
-gradeButtons.forEach((button) => {
-  button.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    if (button.classList.contains('unsubButton')) {
-      fetch('/api/user/unsubscribe', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'appication/json',
-        },
-        body: JSON.stringify({id: ''}),
-      }).then((res) => {
-        if (res.status === 200) {
-          userAlertGood('Vous avez bien été désabonné.');
-
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          userAlert(
-            "Quelque chose s'est mal passé, merci de réessayer plus tard. Si le probleme persiste, merci de le signaler aupres de l'adiil."
-          );
-        }
-      });
-    } else {
-      fetch('/addItemToCartPort', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'item-type': 'grade',
-          },
-          body: JSON.stringify({
-            id: e.target.classList[1][1],
-          }),
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            userAlertGood('Grade ajouté au panier');
-            setTimeout(() => {
-              window.location.href = '/pay';
-            }, 1000);
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (!data.success) {
-            userAlert(data.message);
-          }
-        });
-    }
-  });
-});*/
-
 const gradeButtons = document.querySelectorAll('.gradeBuyButton');
 gradeButtons.forEach((button) => {
   button.addEventListener('click', (e) => {

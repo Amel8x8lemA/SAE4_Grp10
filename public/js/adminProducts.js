@@ -31,8 +31,30 @@ function closePopup() {
 }
 
 function deleteProduct(id) {
-  console.log(id);
+ 
+  const product = products.find((product) => product.id == id);
+  if (!product) return userAlert('Produit introuvable');
+ 
+  fetch('/api/admin/product/remove', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        userAlertGood(data.message);
+        location.reload();
+      } else {
+        userAlert(data.message);
+      }
+    });
 }
+
 
 function modifyProduct(e) {
   e.preventDefault();

@@ -22,7 +22,7 @@ router.get('', async (req, res) => {
     }
 
     //get all products
-    const [productsResults] = await pool.query('SELECT * FROM product');
+    const [productsResults] = await pool.query('SELECT * FROM product WHERE id!=1');
 
     products = productsResults;
   } catch (err) {

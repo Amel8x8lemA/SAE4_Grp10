@@ -1,84 +1,344 @@
--- MariaDB dump 10.19  Distrib 10.5.23-MariaDB, for debian-linux-gnu (x86_64)
---
--- Host: localhost    Database: mydatabase
--- ------------------------------------------------------
--- Server version	10.5.23-MariaDB-0+deb11u1
-
 DROP DATABASE IF EXISTS bdeinfo;
 CREATE DATABASE bdeinfo;
 USE bdeinfo;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */
-;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */
-;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */
-;
-/*!40101 SET NAMES utf8mb4 */
-;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */
-;
-/*!40103 SET TIME_ZONE='+00:00' */
-;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */
-;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */
-;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */
-;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */
-;
---
--- Table structure for table `color`
---
+DROP TABLE IF EXISTS `message`;
+DROP TABLE IF EXISTS `chat_member`;
+DROP TABLE IF EXISTS `chat`;
+DROP TABLE IF EXISTS `product_size`;
+DROP TABLE IF EXISTS `product_color`;
 DROP TABLE IF EXISTS `color`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
+DROP TABLE IF EXISTS `transactionContent`;
+DROP TABLE IF EXISTS `transaction`;
+DROP TABLE IF EXISTS `inscription`;
+DROP TABLE IF EXISTS `usersToRenew`;
+DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `event`;
+DROP TABLE IF EXISTS `product`;
+DROP TABLE IF EXISTS `grade`;
+
+CREATE TABLE `event` (
+  `id` integer PRIMARY KEY,
+  `name` varchar(255),
+  `price` float,
+  `date` datetime,
+  `image` varchar(255)
+);
+
+CREATE TABLE `grade` (
+  `id` integer PRIMARY KEY,
+  `name` varchar(255),
+  `price` integer
+);
+
+CREATE TABLE `user` (
+  `email` varchar(255) PRIMARY KEY,
+  `username` varchar(255),
+  `password` varchar(255),
+  `category` varchar(255),
+  `xp` integer,
+  `grade` integer,
+  `dc_id` varchar(255),
+  `dc_pfp` varchar(255),
+  `dc_username` varchar(255),
+  FOREIGN KEY (`grade`) REFERENCES `grade` (`id`)
+);
+
+CREATE TABLE `usersToRenew` (
+  `user` varchar(255) PRIMARY KEY,
+  `grade` integer,
+  FOREIGN KEY (`user`) REFERENCES `user` (`email`),
+  FOREIGN KEY (`grade`) REFERENCES `grade` (`id`)
+);
+
+CREATE TABLE `inscription` (
+  `user` varchar(255),
+  `event_id` integer,
+  PRIMARY KEY (`user`, `event_id`),
+  FOREIGN KEY (`user`) REFERENCES `user` (`email`),
+  FOREIGN KEY (`event_id`) REFERENCES `event` (`id`)
+);
+
+CREATE TABLE `product` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(255),
+  `price` float,
+  `description` varchar(255),
+  `image` varchar(255),
+  `release_date` datetime,
+  `expire_date` datetime,
+  `confirm_threashold` integer,
+  `color` varchar(255),
+  `is_promoted` int(1)
+);
+
 CREATE TABLE `color` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 10 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `color`
---
-LOCK TABLES `color` WRITE;
-/*!40000 ALTER TABLE `color` DISABLE KEYS */
-;
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(255)
+);
+
+CREATE TABLE `product_color` (
+  `product_id` int,
+  `color_id` int,
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
+  FOREIGN KEY (`color_id`) REFERENCES `color` (`id`)
+);
+
+CREATE TABLE `product_size` (
+  `product_id` int,
+  `name` varchar(255),
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+);
+
+CREATE TABLE `transaction` (
+  `transaction_id` varchar(255) PRIMARY KEY,
+  `email` varchar(255),
+  `validated` int(1),
+  `total_price` float,
+  `purchase_date` datetime,
+  FOREIGN KEY (`email`) REFERENCES `user` (`email`)
+);
+
+CREATE TABLE `transactionContent` (
+  `transaction_id` varchar(255),
+  `event_id` int,
+  `grade_id` int,
+  `product_id` int,
+  `item_name` varchar(255),
+  `item_price` float,
+  `product_qty` int DEFAULT 1 CHECK(`product_qty` > 0),
+  FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`),
+  FOREIGN KEY (`event_id`) REFERENCES `event` (`id`),
+  FOREIGN KEY (`grade_id`) REFERENCES `grade` (`id`),
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+);
+
+CREATE TABLE `chat` (
+  `id_chat` int PRIMARY KEY AUTO_INCREMENT,
+  `name_chat` text NOT NULL
+);
+
+CREATE TABLE `chat_member` (
+  `email` VARCHAR(255),
+  `id_chat` int,
+  PRIMARY KEY (`email`, `id_chat`),
+  FOREIGN KEY (`email`) REFERENCES `user` (`email`),
+  FOREIGN KEY (`id_chat`) REFERENCES `chat` (`id_chat`)
+);
+
+CREATE TABLE `message` (
+  `id_message` int PRIMARY KEY AUTO_INCREMENT,
+  `id_chat` int,
+  `email` VARCHAR(255),
+  `content` text,
+  `send_date` datetime,
+  FOREIGN KEY (`id_chat`) REFERENCES `chat` (`id_chat`),
+  FOREIGN KEY (`email`) REFERENCES `user` (`email`)
+);
+
+CREATE TABLE `chat_connection` (
+  `id_chat` int,
+  `email` VARCHAR(255),
+  `peer_id` VARCHAR(255),
+  `connect_date` datetime,
+  PRIMARY KEY(`id_chat`, `email`),
+  FOREIGN KEY (`id_chat`) REFERENCES `chat` (`id_chat`),
+  FOREIGN KEY (`email`) REFERENCES `user` (`email`)
+);
+
+
+
+DELIMITER //
+CREATE TRIGGER delete_chat_after_last_member_deleted
+AFTER DELETE ON chat_connection
+FOR EACH ROW
+BEGIN
+  -- Récupère l'ID du chat depuis la table deleted
+  DECLARE id_chat INT;
+  SET id_chat = OLD.id_chat;
+
+  -- Vérifie s'il s'agit de la dernière relation pour ce chat
+  IF (SELECT COUNT(*) FROM chat_member WHERE id_chat = id_chat) = 0 AND (SELECT COUNT(*) FROM chat_connection WHERE id_chat = id_chat) = 0 THEN
+  BEGIN
+    -- Supprime le chat de la table chat
+    DELETE FROM message WHERE id_chat = id_chat;
+    DELETE FROM chat WHERE id_chat = id_chat;
+  END;
+  END IF;
+END//
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- color
 INSERT INTO `color`
 VALUES (1, 'rouge'),
   (2, 'bleu-marine');
-/*!40000 ALTER TABLE `color` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `event`
---
-DROP TABLE IF EXISTS `event`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `event` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `price` float DEFAULT NULL,
-  `date` datetime DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `event`
---
-LOCK TABLES `event` WRITE;
-/*!40000 ALTER TABLE `event` DISABLE KEYS */
-;
+
+-- grade
+INSERT INTO `grade`
+VALUES (0, 'Iron', 5),
+  (1, 'Gold', 15),
+  (2, 'Diamant', 25);
+
+-- user
+INSERT INTO `user`
+VALUES (
+    'John.Doe.Etu@univ-lemans.fr',
+    'johnDoe',
+    '4236441508',
+    '21B',
+    220,
+    0,
+    'NULL',
+    'NULL',
+    'NULL'
+  ),
+(
+    'admin@univ-lemans.fr',
+    'admin',
+    '92668751',
+    'admin',
+    0,
+    0,
+    'NULL',
+    'NULL',
+    'NULL'
+  ),
+  (
+    'Todd Smith',
+    'Todd Smith',
+    NULL,
+    NULL,
+    0,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+  );
+
+-- chat
+-- INSERT INTO `chat`
+-- VALUES (NULL, 'chat_1'),
+--   (NULL, 'chat_2');
+
+-- product
+INSERT INTO `product`
+VALUES (
+    1,
+    'Produit supprimé',
+    0,
+    'Produit supprimé',
+    '',
+    '2024-01-24 19:00:00',
+    '2024-01-24 20:00:00',
+    NULL,
+    NULL,
+    NULL
+  ),
+  (
+    2,
+    'Pull 2023-2024',
+    27.5,
+    'Le pull officiel du département informatique pour l\ année 2023-2024. Design par Mathéo Orgé.',
+    'image-1706202613813.png',
+    '2024-01-24 19:00:00',
+    '2024-02-15 20:00:00',
+    NULL,
+    'bleu-marine',
+    1
+  ),
+  (
+    3,
+    'Redbull',
+    1,
+    'Une canette de redbull de 25cl. Goût classic.',
+    'image-1706120804285.png',
+    '2024-01-24 19:00:00',
+    '2024-06-30 23:59:00',
+    NULL,
+    NULL,
+    0
+  );
+
+-- chat_member
+-- INSERT INTO `chat_member`
+-- VALUES ('John.Doe.Etu@univ-lemans.fr', 1),
+--   ('admin@univ-lemans.fr', 1);
+
+-- message
+-- INSERT INTO `message`
+-- VALUES (
+--     NULL,
+--     1,
+--     'John.Doe.Etu@univ-lemans.fr',
+--     'Contenu du message 1',
+--     '2024-01-21 22:38:18'
+--   ),
+--   (
+--     NULL,
+--     1,
+--     'admin@univ-lemans.fr',
+--     'Contenu du message 2',
+--     '2024-01-21 22:38:18'
+--   );
+
+-- event
 INSERT INTO `event`
 VALUES (
     11028701,
@@ -122,220 +382,34 @@ VALUES (
     '2023-10-27 17:30:00',
     'soiree_haloween.webp'
   );
-/*!40000 ALTER TABLE `event` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `grade`
---
-DROP TABLE IF EXISTS `grade`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `grade` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `price` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `grade`
---
-LOCK TABLES `grade` WRITE;
-/*!40000 ALTER TABLE `grade` DISABLE KEYS */
-;
-INSERT INTO `grade`
-VALUES (0, 'Iron', 5),
-  (1, 'Gold', 15),
-  (2, 'Diamant', 25);
-/*!40000 ALTER TABLE `grade` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `inscription`
---
-DROP TABLE IF EXISTS `inscription`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `inscription` (
-  `user` varchar(255) NOT NULL,
-  `event_id` int(11) NOT NULL,
-  PRIMARY KEY (`user`, `event_id`),
-  KEY `event_id` (`event_id`),
-  CONSTRAINT `inscription_ibfk_1` FOREIGN KEY (`user`) REFERENCES `user` (`email`),
-  CONSTRAINT `inscription_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `inscription`
---
-LOCK TABLES `inscription` WRITE;
-/*!40000 ALTER TABLE `inscription` DISABLE KEYS */
-;
-INSERT INTO `inscription`
-VALUES ('', 801547147),
-  ('a', 239501416),
-  ('Adrien Derache V2', 1089493169),
-  ('AIT-LAHCEN ABDELADEM', 940575287),
-  ('AIT-LAHCEN ABDELADEM', 1567685583),
-  ('alex.lemoine.etu@univ-lemans.fr', 1946907562),
-  ('Alexandre ANTONIO', 341554572),
-  (
-    'alexandre.grasteau.etu@univ-lemans.fr',
-    485759472
-  );
-/*!40000 ALTER TABLE `inscription` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `product`
---
-DROP TABLE IF EXISTS `product`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `product` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `price` float DEFAULT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `release_date` datetime DEFAULT NULL,
-  `expire_date` datetime DEFAULT NULL,
-  `confirm_threashold` int(11) DEFAULT NULL,
-  `color` varchar(255) DEFAULT NULL,
-  `is_promoted` int(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 8 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `product`
---
-LOCK TABLES `product` WRITE;
-/*!40000 ALTER TABLE `product` DISABLE KEYS */
-;
-INSERT INTO `product`
-VALUES (
-    2,
-    'Pull 2023-2024',
-    27.5,
-    'Le pull officiel du département informatique pour l\'année 2023-2024. Design par Mathéo Orgé.',
-    'image-1706202613813.png',
-    '2024-01-24 19:00:00',
-    '2024-02-15 20:00:00',
-    NULL,
-    'bleu-marine',
-    1
-  ),
-  (
-    3,
-    'Redbull',
-    1,
-    'Une canette de redbull de 25cl. Goût classic.',
-    'image-1706120804285.png',
-    '2024-01-24 19:00:00',
-    '2024-06-30 23:59:00',
-    NULL,
-    NULL,
-    0
-  );
-/*!40000 ALTER TABLE `product` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `product_color`
---
-DROP TABLE IF EXISTS `product_color`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `product_color` (
-  `product_id` int(11) DEFAULT NULL,
-  `color_id` int(11) DEFAULT NULL,
-  KEY `product_id` (`product_id`),
-  KEY `color_id` (`color_id`),
-  CONSTRAINT `product_color_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
-  CONSTRAINT `product_color_ibfk_2` FOREIGN KEY (`color_id`) REFERENCES `color` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `product_color`
---
-LOCK TABLES `product_color` WRITE;
-/*!40000 ALTER TABLE `product_color` DISABLE KEYS */
-;
+
+-- inscription
+-- INSERT INTO `inscription`
+-- VALUES ('', 801547147),
+--   ('a', 239501416),
+--   ('Adrien Derache V2', 1089493169),
+--   ('AIT-LAHCEN ABDELADEM', 940575287),
+--   ('AIT-LAHCEN ABDELADEM', 1567685583),
+--   ('alex.lemoine.etu@univ-lemans.fr', 1946907562),
+--   ('Alexandre ANTONIO', 341554572),
+--   (
+--     'alexandre.grasteau.etu@univ-lemans.fr',
+--     485759472
+--   );
+
+-- product_color
 INSERT INTO `product_color`
 VALUES (2, 2);
-/*!40000 ALTER TABLE `product_color` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `product_size`
---
-DROP TABLE IF EXISTS `product_size`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `product_size` (
-  `product_id` int(11) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  KEY `product_id` (`product_id`),
-  CONSTRAINT `product_size_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `product_size`
---
-LOCK TABLES `product_size` WRITE;
-/*!40000 ALTER TABLE `product_size` DISABLE KEYS */
-;
+
+-- product_size
 INSERT INTO `product_size`
 VALUES (2, 's'),
   (2, 'xl'),
   (2, ' xxl'),
   (2, ' l'),
   (2, ' m');
-/*!40000 ALTER TABLE `product_size` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `transaction`
---
-DROP TABLE IF EXISTS `transaction`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `transaction` (
-  `transaction_id` varchar(255) NOT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `validated` tinyint(1) DEFAULT 0,
-  `total_price` float DEFAULT NULL,
-  `purchase_date` datetime NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`transaction_id`),
-  KEY `email` (`email`),
-  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`email`) REFERENCES `user` (`email`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `transaction`
---
-LOCK TABLES `transaction` WRITE;
-/*!40000 ALTER TABLE `transaction` DISABLE KEYS */
-;
+
+-- transaction
 INSERT INTO `transaction`
 VALUES (
     '02028300MP216124T',
@@ -344,42 +418,8 @@ VALUES (
     NULL,
     '2024-01-21 22:38:18'
   );
-/*!40000 ALTER TABLE `transaction` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `transactionContent`
---
-DROP TABLE IF EXISTS `transactionContent`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `transactionContent` (
-  `transaction_id` varchar(255) DEFAULT NULL,
-  `event_id` int(11) DEFAULT NULL,
-  `grade_id` int(11) DEFAULT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `item_name` varchar(255) DEFAULT NULL,
-  `item_price` float DEFAULT NULL,
-  KEY `event_id` (`event_id`),
-  KEY `grade_id` (`grade_id`),
-  KEY `transaction_id` (`transaction_id`),
-  KEY `product_id` (`product_id`),
-  CONSTRAINT `transactionContent_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`),
-  CONSTRAINT `transactionContent_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`),
-  CONSTRAINT `transactionContent_ibfk_3` FOREIGN KEY (`grade_id`) REFERENCES `grade` (`id`),
-  CONSTRAINT `transactionContent_ibfk_4` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`),
-  CONSTRAINT `transactionContent_ibfk_5` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `transactionContent`
---
-LOCK TABLES `transactionContent` WRITE;
-/*!40000 ALTER TABLE `transactionContent` DISABLE KEYS */
-;
+
+-- transactionContent
 INSERT INTO `transactionContent`
 VALUES (
     '02028300MP216124T',
@@ -387,123 +427,14 @@ VALUES (
     NULL,
     2,
     'Pull 2023-2024(m)',
-    27.5
+    27.5,
+    1
   );
-/*!40000 ALTER TABLE `transactionContent` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `user`
---
-DROP TABLE IF EXISTS `user`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `user` (
-  `email` varchar(255) NOT NULL,
-  `username` varchar(255) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `category` varchar(255) DEFAULT NULL,
-  `xp` int(11) NOT NULL DEFAULT 0,
-  `grade` int(11) DEFAULT NULL,
-  `dc_username` varchar(40) DEFAULT NULL,
-  `dc_id` varchar(40) DEFAULT NULL,
-  `dc_pfp` varchar(40) DEFAULT NULL,
-  PRIMARY KEY (`email`),
-  KEY `grade` (`grade`),
-  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`grade`) REFERENCES `grade` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `user`
---
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */
-;
-INSERT INTO `user`
-VALUES (
-    'John.Doe.Etu@univ-lemans.fr',
-    'johnDoe',
-    '4236441508',
-    '21B',
-    220,
-    0,
-    'NULL',
-    'NULL',
-    'NULL'
-  ),
-(
-    'admin@univ-lemans.fr',
-    'admin',
-    '92668751',
-    'admin',
-    0,
-    0,
-    'NULL',
-    'NULL',
-    'NULL'
-  ),
-  (
-    'Todd Smith',
-    'Todd Smith',
-    NULL,
-    NULL,
-    0,
-    NULL,
-    NULL,
-    NULL,
-    NULL
-  );
-/*!40000 ALTER TABLE `user` ENABLE KEYS */
-;
-UNLOCK TABLES;
---
--- Table structure for table `usersToRenew`
---
-DROP TABLE IF EXISTS `usersToRenew`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */
-;
-/*!40101 SET character_set_client = utf8 */
-;
-CREATE TABLE `usersToRenew` (
-  `user` varchar(255) NOT NULL,
-  `grade` int(11) DEFAULT NULL,
-  PRIMARY KEY (`user`),
-  KEY `grade` (`grade`),
-  CONSTRAINT `usersToRenew_ibfk_1` FOREIGN KEY (`grade`) REFERENCES `grade` (`id`),
-  CONSTRAINT `usersToRenew_ibfk_2` FOREIGN KEY (`user`) REFERENCES `user` (`email`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */
-;
---
--- Dumping data for table `usersToRenew`
---
-LOCK TABLES `usersToRenew` WRITE;
-/*!40000 ALTER TABLE `usersToRenew` DISABLE KEYS */
-;
-INSERT INTO `usersToRenew`
-VALUES ('John.Doe.Etu@univ-lemans.fr', 2);
-/*!40000 ALTER TABLE `usersToRenew` ENABLE KEYS */
-;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */
-;
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */
-;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */
-;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */
-;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */
-;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */
-;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */
-;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */
-;
--- Dump completed on 2024-02-28  9:24:54
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON bdeinfo.* TO 'etu'@'%' IDENTIFIED BY 'amego777' WITH GRANT OPTION;
+
+
+
+USE bdeinfo;
+REVOKE ALL PRIVILEGES ON bdeinfo.* FROM 'etu'@'%';
+GRANT SELECT, UPDATE, DELETE, INSERT ON bdeinfo.* TO 'etu'@'%' IDENTIFIED BY 'amego777';
+flush privileges;
