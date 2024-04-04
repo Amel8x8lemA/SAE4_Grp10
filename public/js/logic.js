@@ -443,6 +443,7 @@ if (window.calData !== undefined) {
   renderEventsCalendar(filteredEvents);
 }
 
+/*
 const gradeButtons = document.querySelectorAll('.gradeBuyButton');
 gradeButtons.forEach((button) => {
   button.addEventListener('click', (e) => {
@@ -470,15 +471,15 @@ gradeButtons.forEach((button) => {
       });
     } else {
       fetch('/addItemToCartPort', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'item-type': 'grade',
-        },
-        body: JSON.stringify({
-          id: e.target.classList[1][1],
-        }),
-      })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'item-type': 'grade',
+          },
+          body: JSON.stringify({
+            id: e.target.classList[1][1],
+          }),
+        })
         .then((res) => {
           if (res.status === 200) {
             userAlertGood('Grade ajouté au panier');
@@ -495,7 +496,80 @@ gradeButtons.forEach((button) => {
         });
     }
   });
+});*/
+
+const gradeButtons = document.querySelectorAll('.gradeBuyButton');
+gradeButtons.forEach((button) => {
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    if (button.classList.contains('unsubButton')) {
+      fetch('/api/user/unsubscribe', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'appication/json',
+        },
+        body: JSON.stringify({id: ''}),
+      }).then((res) => {
+        if (res.status === 200) {
+          userAlertGood('Vous avez bien été désabonné.');
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          userAlert(
+            "Quelque chose s'est mal passé, merci de réessayer plus tard. Si le probleme persiste, merci de le signaler aupres de l'adiil."
+          );
+        }
+      });
+    } else {
+      // Récupérer les éléments actuels du panier depuis l'API
+      fetch('/api/user/getCartItems')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Erreur lors de la récupération du panier');
+        }
+        return res.json();
+      })
+      .then((res) => {
+        cartItems = res.items
+        // Vérifier si un grade est déjà présent dans le panier
+        const gradeAlreadyInCart = cartItems.some(item => item.identifier.type === 'grade');
+
+        if (gradeAlreadyInCart) {
+          userAlert("Un grade est déjà présent dans le panier.");
+        } else {
+          fetch('/addItemToCartPort', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'item-type': 'grade',
+            },
+            body: JSON.stringify({
+              id: e.target.classList[1][1],
+            }),
+          })
+          .then((res) => {
+            if (res.status === 200) {
+              userAlertGood('Grade ajouté au panier');
+              setTimeout(() => {
+                window.location.href = '/pay';
+              }, 1000);
+            }
+            return res.json();
+          })
+          .then((data) => {
+            if (!data.success) {
+              userAlert(data.message);
+            }
+          });
+        }
+      })
+    }
+  });
 });
+
 
 function randomPastelColor(str) {
   const isDark = document.body.getAttribute('data-theme') === 'dark';
