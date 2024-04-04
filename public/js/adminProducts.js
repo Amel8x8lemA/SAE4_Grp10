@@ -31,10 +31,10 @@ function closePopup() {
 }
 
 function deleteProduct(id) {
- 
+
   const product = products.find((product) => product.id == id);
   if (!product) return userAlert('Produit introuvable');
- 
+
   fetch('/api/admin/product/remove', {
     method: 'POST',
     headers: {

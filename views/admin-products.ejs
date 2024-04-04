@@ -142,10 +142,8 @@
           >
             Supprimer
           </button>
-          <button
-            class="adminButton"
-            onclick="editProduct('<%= product.id %>'); event.stopPropagation()"
-          >
+          <button class="deleteButton" 
+          data-product-id="ID_du_produit_à_supprimer">
             Modifier
           </button>
           <span class="bottomProductSpan">
