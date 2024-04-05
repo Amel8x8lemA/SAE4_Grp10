@@ -2,9 +2,6 @@ DROP DATABASE IF EXISTS bdeinfo;
 CREATE DATABASE bdeinfo;
 USE bdeinfo;
 
-DROP TABLE IF EXISTS `message`;
-DROP TABLE IF EXISTS `chat_member`;
-DROP TABLE IF EXISTS `chat`;
 DROP TABLE IF EXISTS `product_size`;
 DROP TABLE IF EXISTS `product_color`;
 DROP TABLE IF EXISTS `color`;
@@ -113,63 +110,6 @@ CREATE TABLE `transactionContent` (
   FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 );
 
-CREATE TABLE `chat` (
-  `id_chat` int PRIMARY KEY AUTO_INCREMENT,
-  `name_chat` text NOT NULL
-);
-
-CREATE TABLE `chat_member` (
-  `email` VARCHAR(255),
-  `id_chat` int,
-  PRIMARY KEY (`email`, `id_chat`),
-  FOREIGN KEY (`email`) REFERENCES `user` (`email`),
-  FOREIGN KEY (`id_chat`) REFERENCES `chat` (`id_chat`)
-);
-
-CREATE TABLE `message` (
-  `id_message` int PRIMARY KEY AUTO_INCREMENT,
-  `id_chat` int,
-  `email` VARCHAR(255),
-  `content` text,
-  `send_date` datetime,
-  FOREIGN KEY (`id_chat`) REFERENCES `chat` (`id_chat`),
-  FOREIGN KEY (`email`) REFERENCES `user` (`email`)
-);
-
-CREATE TABLE `chat_connection` (
-  `id_chat` int,
-  `email` VARCHAR(255),
-  `peer_id` VARCHAR(255),
-  `connect_date` datetime,
-  PRIMARY KEY(`id_chat`, `email`),
-  FOREIGN KEY (`id_chat`) REFERENCES `chat` (`id_chat`),
-  FOREIGN KEY (`email`) REFERENCES `user` (`email`)
-);
-
-
-
-DELIMITER //
-CREATE TRIGGER delete_chat_after_last_member_deleted
-AFTER DELETE ON chat_connection
-FOR EACH ROW
-BEGIN
-  -- Récupère l'ID du chat depuis la table deleted
-  DECLARE id_chat INT;
-  SET id_chat = OLD.id_chat;
-
-  -- Vérifie s'il s'agit de la dernière relation pour ce chat
-  IF (SELECT COUNT(*) FROM chat_member WHERE id_chat = id_chat) = 0 AND (SELECT COUNT(*) FROM chat_connection WHERE id_chat = id_chat) = 0 THEN
-  BEGIN
-    -- Supprime le chat de la table chat
-    DELETE FROM message WHERE id_chat = id_chat;
-    DELETE FROM chat WHERE id_chat = id_chat;
-  END;
-  END IF;
-END//
-DELIMITER ;
-
-
-
 
 
 
@@ -272,11 +212,6 @@ VALUES (
     NULL
   );
 
--- chat
--- INSERT INTO `chat`
--- VALUES (NULL, 'chat_1'),
---   (NULL, 'chat_2');
-
 -- product
 INSERT INTO `product`
 VALUES (
@@ -316,27 +251,6 @@ VALUES (
     0
   );
 
--- chat_member
--- INSERT INTO `chat_member`
--- VALUES ('John.Doe.Etu@univ-lemans.fr', 1),
---   ('admin@univ-lemans.fr', 1);
-
--- message
--- INSERT INTO `message`
--- VALUES (
---     NULL,
---     1,
---     'John.Doe.Etu@univ-lemans.fr',
---     'Contenu du message 1',
---     '2024-01-21 22:38:18'
---   ),
---   (
---     NULL,
---     1,
---     'admin@univ-lemans.fr',
---     'Contenu du message 2',
---     '2024-01-21 22:38:18'
---   );
 
 -- event
 INSERT INTO `event`

@@ -10,8 +10,9 @@ import {
 } from '../server.js';
 
 function cleanStringToObject(inputString) {
+  console.log(inputString)
   // Extract content within <span> tags
-  const spanContent = inputString.match(/<span>(.*?)<\/span>/)[1];
+  const spanContent = inputString.match(/<pre>(.*?)<\/pre>/)[1] ? inputString.match(/<pre>(.*?)<\/pre>/)[1] : inputString.match(/<span>(.*?)<\/span>/)[1];
 
   // Split content based on curly braces {} to separate key-value pairs
   const keyValuePairs = spanContent.split(/\s*},\s*/);
@@ -78,6 +79,8 @@ router.get('', async (req, res) => {
     //for debuging pruposes
     const debugEventTitles = [];
     const promises = [];
+
+    console.log(events);
 
     events.forEach(async (event) => {
       let id = generateEventId(event.start, event.summary);
