@@ -54,6 +54,16 @@ router.post('', upload.single('image'), async (req, res) => {
       return;
     }
 
+    // Check if confirm_threashold is negative
+    if (parseFloat(confirm_threashold) < 0) {
+      //delete the uploaded file
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(403).json({success: false, message: 'Le seuil de confirmation ne peut pas être négatif'});
+      return;
+    }
+
     // Check if the release_date is before the expire_date
     if (new Date(release_date) >= new Date(expire_date)) {
       // Delete the uploaded file if there is one
