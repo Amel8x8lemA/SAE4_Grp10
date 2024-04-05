@@ -12,7 +12,7 @@ router.post('', async (req, res) => {
 
     //update transactioncontent
     await pool.query(
-      'UPDATE transactionContent SET product_id = 0 WHERE product_id=?',
+      'UPDATE transactionContent SET product_id = 1 WHERE product_id=?',
       [id],
       (err) => {
         if (err) {
