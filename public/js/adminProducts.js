@@ -625,8 +625,10 @@ function getSalesByProduct() {
   const productsNames = [];
   const salesByProduct = [];
   products.forEach((product) => {
-    productsNames.push(product.name);
-    salesByProduct.push(product.sales.length);
+    if (product.id != 1) {
+      productsNames.push(product.name);
+      salesByProduct.push(product.sales.length);
+    }
   });
   return {productsNames, salesByProduct};
 }
